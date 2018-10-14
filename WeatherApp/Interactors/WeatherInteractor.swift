@@ -12,10 +12,9 @@ import CoreLocation
 
 class WeatherInteractor {
     
-    func getDailyWeatherForeCast(completionHandler: @escaping (_ weather: Weather?) -> Void) {
+    func getDailyWeatherForecastForLocation(_ location: CLLocation, completionHandler: @escaping (_ weather: Weather?) -> Void) {
         
-        
-        guard let url = URL(string: "https://api.darksky.net/forecast/b1b4beb010f9147963bd803fb9bbd9ae/24.4539,54.3773") else {
+        guard let url = URL(string:AppConstants.BaseUrls.DARKSKY_API_BASE_URL+AppConstants.DARKSKY_API_KEY+"/\(location.coordinate.latitude),\(location.coordinate.longitude)") else {
             completionHandler(nil)
             return
         }

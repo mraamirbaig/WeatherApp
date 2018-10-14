@@ -11,11 +11,11 @@ import Foundation
 class AppConstants {
     
     
-    static let DARKSKY_API_KEY = "da8f56f779904de9a5c008295f63713b"
+    static let DARKSKY_API_KEY = "b1b4beb010f9147963bd803fb9bbd9ae"
     
     struct BaseUrls {
         
-        static let ARTICLE_BASE_URL = "https://api.darksky.net/forecast"
+        static let DARKSKY_API_BASE_URL = "https://api.darksky.net/forecast/"
     }
     
     enum TEMPERATURE_TYPE: String {

@@ -7,8 +7,11 @@
 //
 
 import UIKit
+import CoreLocation
 
 class ForecastListVC: UIViewController {
+    
+    var locationManager: CLLocationManager!
     
     @IBOutlet private weak var tempTypeSegControl: UISegmentedControl!
     @IBOutlet private weak var forecastListTableView: UITableView!
@@ -34,14 +37,20 @@ class ForecastListVC: UIViewController {
     private func setUp() {
         
         forecastListTableView.register(UINib(nibName: "ForecastListCell", bundle: nil), forCellReuseIdentifier: "ForecastListCell")
+        
         tempTypeSegControl.selectedSegmentIndex = 0
-        fetchWeather()
+        
+        self.locationManager = CLLocationManager()
+        locationManager.requestAlwaysAuthorization()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.startUpdatingLocation()
     }
     
-    private func fetchWeather() {
+    private func fetchWeatherForLocation(_ location: CLLocation) {
         
         let forecastListVCPresenter = ForecastListVCPresenter.init(forecastListVC: self)
-        forecastListVCPresenter.fetchDailyWeatherForecast()
+        forecastListVCPresenter.fetchDailyWeatherForecastForLocation(location)
     }
     
     private func reloadView() {
@@ -61,7 +70,8 @@ class ForecastListVC: UIViewController {
         
         let alert = UIAlertController(title: "Loading failed", message: "Failed to load weather. Please try again.", preferredStyle: .alert)
         alert.addAction(UIAlertAction.init(title: "Try Again", style: .default, handler: { (_) in
-            self.fetchWeather()
+            self.startLoaderAnimation(true)
+            self.locationManager.startUpdatingLocation()
         }))
         self.present(alert, animated: true, completion: nil)
     }
@@ -107,5 +117,17 @@ extension ForecastListVC: UITableViewDelegate, UITableViewDataSource {
         
         performSegue(withIdentifier: "ShowForecastDetailSegue", sender: weatherDataArray[indexPath.row])
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+extension ForecastListVC: CLLocationManagerDelegate {
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        if let location = locations.first {
+            startLoaderAnimation(false)
+            locationManager.stopUpdatingLocation()
+            fetchWeatherForLocation(location)
+        }
     }
 }

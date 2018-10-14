@@ -7,10 +7,10 @@
 //
 
 import Foundation
+import CoreLocation
 
 
 class ForecastListVCPresenter {
-    
     
     let forecastListVC: ForecastListVC!
     
@@ -19,12 +19,12 @@ class ForecastListVCPresenter {
         self.forecastListVC = forecastListVC
     }
     
-    func fetchDailyWeatherForecast() {
+    func fetchDailyWeatherForecastForLocation(_ location: CLLocation) {
         
         forecastListVC.startLoaderAnimation(true)
         let weatherInteractor = WeatherInteractor()
         
-        weatherInteractor.getDailyWeatherForeCast { (weather) in
+        weatherInteractor.getDailyWeatherForecastForLocation(location) { (weather) in
             
             DispatchQueue.main.async {
                 self.forecastListVC.startLoaderAnimation(false)
