@@ -1,0 +1,111 @@
+//
+//  ForecastListVC.swift
+//  WeatherApp
+//
+//  Created by FAB on 10/13/18.
+//  Copyright © 2018 Aamir Baig. All rights reserved.
+//
+
+import UIKit
+
+class ForecastListVC: UIViewController {
+    
+    @IBOutlet private weak var tempTypeSegControl: UISegmentedControl!
+    @IBOutlet private weak var forecastListTableView: UITableView!
+    @IBOutlet private weak var loader: UIActivityIndicatorView!
+    
+    var weather: Weather? {
+        didSet {
+            if weather != nil {
+                weatherDataArray = weather!.data
+            }else { weatherDataArray = []}
+            reloadView()
+        }
+    }
+    
+    private var weatherDataArray = [WeatherData]()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setUp()
+    }
+    
+    private func setUp() {
+        
+        forecastListTableView.register(UINib(nibName: "ForecastListCell", bundle: nil), forCellReuseIdentifier: "ForecastListCell")
+        tempTypeSegControl.selectedSegmentIndex = 0
+        fetchWeather()
+    }
+    
+    private func fetchWeather() {
+        
+        let forecastListVCPresenter = ForecastListVCPresenter.init(forecastListVC: self)
+        forecastListVCPresenter.fetchDailyWeatherForecast()
+    }
+    
+    private func reloadView() {
+        
+        self.forecastListTableView.reloadData()
+    }
+    
+    func startLoaderAnimation(_ start: Bool) {
+        if start == true {
+            loader.startAnimating()
+        }else {
+            loader.stopAnimating()
+        }
+    }
+    
+    func showFailureAlert() {
+        
+        let alert = UIAlertController(title: "Loading failed", message: "Failed to load weather. Please try again.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction.init(title: "Try Again", style: .default, handler: { (_) in
+            self.fetchWeather()
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    private func getCurrentTempType() -> AppConstants.TEMPERATURE_TYPE {
+        if tempTypeSegControl.selectedSegmentIndex == 0 {
+            return AppConstants.TEMPERATURE_TYPE.FAHRENHEIT
+        }else {
+            return AppConstants.TEMPERATURE_TYPE.CELSIUS
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowForecastDetailSegue", let weatherData = sender as? WeatherData {
+            let forecastDetailVC =  segue.destination as! ForecastDetailVC
+            forecastDetailVC.weatherData = weatherData
+        }
+    }
+    
+    @IBAction func tempTypeValueChanged(_ sender: Any) {
+        
+        reloadView()
+    }
+}
+
+extension ForecastListVC: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return weatherDataArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ForecastListCell", for: indexPath) as! ForecastListCell
+         
+        cell.setWeatherData(weatherDataArray[indexPath.row], showTemperatureType: getCurrentTempType())
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        performSegue(withIdentifier: "ShowForecastDetailSegue", sender: weatherDataArray[indexPath.row])
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
