@@ -32,6 +32,7 @@ class ForecastListVC: UIViewController {
         super.viewDidLoad()
         
         setUp()
+        fetchWeather()
     }
     
     private func setUp() {
@@ -44,7 +45,11 @@ class ForecastListVC: UIViewController {
         locationManager.requestAlwaysAuthorization()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.startUpdatingLocation()
+    }
+    
+    private func fetchWeather() {
+        self.startLoaderAnimation(true)
+        self.locationManager.startUpdatingLocation()
     }
     
     private func fetchWeatherForLocation(_ location: CLLocation) {
@@ -70,8 +75,7 @@ class ForecastListVC: UIViewController {
         
         let alert = UIAlertController(title: "Loading failed", message: "Failed to load weather. Please try again.", preferredStyle: .alert)
         alert.addAction(UIAlertAction.init(title: "Try Again", style: .default, handler: { (_) in
-            self.startLoaderAnimation(true)
-            self.locationManager.startUpdatingLocation()
+            self.fetchWeather()
         }))
         self.present(alert, animated: true, completion: nil)
     }
